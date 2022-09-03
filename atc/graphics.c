@@ -90,6 +90,11 @@ erase_all()
 	}
 }
 
+short
+get_color(PLANE *pp) {
+	return floor(pp->altitude / 2 + 1);
+}
+
 void
 draw_all()
 {
@@ -97,17 +102,45 @@ draw_all()
 
 	for (pp = air.head; pp != NULL; pp = pp->next) {
 		if (pp->status == S_MARKED)
-			wstandout(radar);
+			wattron(radar, COLOR_PAIR(get_color(pp)+5));
+		else
+			wattron(radar, COLOR_PAIR(get_color(pp)));
 		wmove(radar, pp->ypos, pp->xpos * 2);
 		waddch(radar, name(pp));
 		waddch(radar, '0' + pp->altitude);
 		if (pp->status == S_MARKED)
-			wstandend(radar);
+			wattroff(radar, COLOR_PAIR(get_color(pp)+5));
+		else
+			wattroff(radar, COLOR_PAIR(get_color(pp)));
 	}
 	wrefresh(radar);
 	planewin();
 	wrefresh(input);		/* return cursor */
 	fflush(stdout);
+}
+
+void
+init_colors() {
+	if (has_colors() == FALSE) {
+		endwin();
+		printf("Your terminal does not support color\n");
+		exit(1);
+	}
+	start_color();
+
+	// unmarked
+	init_pair(5, COLOR_RED, COLOR_BLACK);
+	init_pair(4, COLOR_YELLOW, COLOR_BLACK);
+	init_pair(3, COLOR_GREEN, COLOR_BLACK);
+	init_pair(2, COLOR_CYAN, COLOR_BLACK);
+	init_pair(1, COLOR_MAGENTA, COLOR_BLACK);
+
+	// marked
+	init_pair(10, COLOR_BLACK, COLOR_RED);
+	init_pair(9, COLOR_BLACK, COLOR_YELLOW);
+	init_pair(8, COLOR_BLACK, COLOR_GREEN);
+	init_pair(7, COLOR_BLACK, COLOR_CYAN);
+	init_pair(6, COLOR_BLACK, COLOR_MAGENTA);
 }
 
 void
@@ -118,9 +151,10 @@ init_gr()
 	initscr();
 	setbuf(stdout, buffer);
 	input = newwin(INPUT_LINES, COLS - PLANE_COLS, LINES - INPUT_LINES, 0);
-	credit = newwin(INPUT_LINES, PLANE_COLS, LINES - INPUT_LINES, 
+	credit = newwin(INPUT_LINES, PLANE_COLS, LINES - INPUT_LINES,
 		COLS - PLANE_COLS);
 	planes = newwin(LINES - INPUT_LINES, PLANE_COLS, 0, COLS - PLANE_COLS);
+	init_colors();
 }
 
 void
@@ -209,7 +243,7 @@ setup_screen(scp)
 		wmove(radar, scp->airport[i].y, scp->airport[i].x * 2);
 		waddstr(radar, str);
 	}
-	
+
 	overwrite(radar, cleanradar);
 	wrefresh(radar);
 	wrefresh(credit);
