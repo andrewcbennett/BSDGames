@@ -91,7 +91,9 @@ erase_all()
 }
 
 short
-get_color(PLANE *pp) {
+get_color(pp)
+	PLANE *pp;
+{
 	return floor(pp->altitude / 2 + 1);
 }
 
@@ -120,7 +122,8 @@ draw_all()
 }
 
 void
-init_colors() {
+init_colors()
+{
 	if (has_colors() == FALSE) {
 		endwin();
 		printf("Your terminal does not support color\n");

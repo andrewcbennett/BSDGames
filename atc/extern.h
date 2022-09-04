@@ -78,6 +78,8 @@ void		erase_all(void);
 int		getAChar(void);
 int		getcommand(void);
 int		gettoken(void);
+void       init_colors(void);
+short       get_color(PLANE *);
 void		init_gr(void);
 void		ioaddstr(int, const char *);
 void		ioclrtobot(void);
