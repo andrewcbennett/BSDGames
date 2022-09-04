@@ -103,14 +103,18 @@ draw_all()
 	PLANE	*pp;
 
 	for (pp = air.head; pp != NULL; pp = pp->next) {
-		if (pp->status == S_MARKED)
+		if (pp->collision_warn == TRUE)
+			wattron(radar, COLOR_PAIR(11));
+		else if (pp->status == S_MARKED)
 			wattron(radar, COLOR_PAIR(get_color(pp)+5));
 		else
 			wattron(radar, COLOR_PAIR(get_color(pp)));
 		wmove(radar, pp->ypos, pp->xpos * 2);
 		waddch(radar, name(pp));
 		waddch(radar, '0' + pp->altitude);
-		if (pp->status == S_MARKED)
+		if (pp->collision_warn == TRUE)
+			wattroff(radar, COLOR_PAIR(11));
+		else if (pp->status == S_MARKED)
 			wattroff(radar, COLOR_PAIR(get_color(pp)+5));
 		else
 			wattroff(radar, COLOR_PAIR(get_color(pp)));
@@ -136,14 +140,17 @@ init_colors()
 	init_pair(4, COLOR_YELLOW, COLOR_BLACK);
 	init_pair(3, COLOR_GREEN, COLOR_BLACK);
 	init_pair(2, COLOR_CYAN, COLOR_BLACK);
-	init_pair(1, COLOR_MAGENTA, COLOR_BLACK);
+	init_pair(1, COLOR_BLUE, COLOR_BLACK);
 
 	// marked
 	init_pair(10, COLOR_BLACK, COLOR_RED);
 	init_pair(9, COLOR_BLACK, COLOR_YELLOW);
 	init_pair(8, COLOR_BLACK, COLOR_GREEN);
 	init_pair(7, COLOR_BLACK, COLOR_CYAN);
-	init_pair(6, COLOR_BLACK, COLOR_MAGENTA);
+	init_pair(6, COLOR_BLACK, COLOR_BLUE);
+
+	// collision warning color
+	init_pair(11, COLOR_WHITE, COLOR_MAGENTA);
 }
 
 void

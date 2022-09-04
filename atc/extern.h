@@ -104,6 +104,7 @@ int		read_file(const char *);
 void		redraw(void);
 void		rezero(void);
 void		setup_screen(const C_SCREEN *);
+int		too_close_alt_xy(const PLANE *p1, const PLANE *p2, int, int);
 int		too_close(const PLANE *p1, const PLANE *p2, int);
 void		update(int);
 int		yyerror(const char *);

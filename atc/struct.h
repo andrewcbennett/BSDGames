@@ -88,6 +88,7 @@ typedef struct plane {
 	int		ypos;
 	int		delayd;
 	int		delayd_no;
+	bool	collision_warn;
 } PLANE;
 
 typedef struct {

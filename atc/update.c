@@ -194,6 +194,19 @@ update(dummy)
 		}
 	}
 
+	/*
+	 * Reset collision warning for all planes
+	 */
+	for (pp = air.head; pp != NULL; pp = pp->next)
+		pp->collision_warn = FALSE;
+
+	for (p1 = air.head; p1 != NULL; p1 = p1->next)
+		for (p2 = p1->next; p2 != NULL; p2 = p2->next)
+			if (too_close_alt_xy(p1, p2, 1, 4)) {
+				p1->collision_warn = TRUE;
+				p2->collision_warn = TRUE;
+			}
+
 	draw_all();
 
 	for (p1 = air.head; p1 != NULL; p1 = p1->next)
@@ -205,6 +218,7 @@ update(dummy)
 					name(p2));
 				loser(p1, buf);
 			}
+			
 	/*
 	 * Check every other update.  Actually, only add on even updates.
 	 * Otherwise, prop jobs show up *on* entrance.  Remember that
@@ -223,11 +237,12 @@ command(pp)
 	const PLANE	*pp;
 {
 	static char	buf[50], *bp, *comm_start;
+	bool warning = (pp->fuel < LOWFUEL) || (pp->collision_warn == TRUE)? TRUE : FALSE;
 
 	buf[0] = '\0';
 	bp = buf;
 	(void)sprintf(bp, "%c%d%c%c%d: ", name(pp), pp->altitude, 
-		(pp->fuel < LOWFUEL) ? '*' : ' ',
+		warning ? '*' : ' ',
 		(pp->dest_type == T_AIRPORT) ? 'A' : 'E', pp->dest_no);
 
 	comm_start = bp = strchr(buf, '\0');
@@ -310,6 +325,7 @@ addplane()
 
 	p.status = S_MARKED;
 	p.plane_type = random() % 2;
+	p.collision_warn = FALSE;
 
 	num_starts = sp->num_exits + sp->num_airports;
 	rnd = random() % num_starts;
@@ -389,15 +405,25 @@ findplane(n)
 }
 
 int
+too_close_alt_xy(p1, p2, dist_alt, dist_xy)
+	const PLANE	*p1, *p2;
+	int	 dist_alt;
+	int  dist_xy;
+{
+	if (ABS(p1->altitude - p2->altitude) <= dist_alt &&
+	    ABS(p1->xpos - p2->xpos) <= dist_xy &&
+		ABS(p1->ypos - p2->ypos) <= dist_xy)
+		return(1);
+	else
+		return(0);
+}
+
+int
 too_close(p1, p2, dist)
 	const PLANE	*p1, *p2;
 	int	 dist;
 {
-	if (ABS(p1->altitude - p2->altitude) <= dist &&
-	    ABS(p1->xpos - p2->xpos) <= dist && ABS(p1->ypos - p2->ypos) <= dist)
-		return (1);
-	else
-		return (0);
+	return(too_close_alt_xy(p1, p2, dist, dist));
 }
 
 int
