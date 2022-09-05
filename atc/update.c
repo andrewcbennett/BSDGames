@@ -200,12 +200,25 @@ update(dummy)
 	for (pp = air.head; pp != NULL; pp = pp->next)
 		pp->collision_warn = FALSE;
 
-	for (p1 = air.head; p1 != NULL; p1 = p1->next)
-		for (p2 = p1->next; p2 != NULL; p2 = p2->next)
-			if (too_close_alt_xy(p1, p2, 1, 4)) {
+	PLANE future_p1, future_p2;
+	for (p1 = air.head; p1 != NULL; p1 = p1->next) {
+		memcpy(&future_p1, p1, sizeof(future_p1));
+		future_p1.xpos += displacement[future_p1.dir].dx;
+		future_p1.ypos += displacement[future_p1.dir].dy;
+		future_p1.altitude += SGN(future_p1.new_altitude - future_p1.altitude);
+
+		for (p2 = p1->next; p2 != NULL; p2 = p2->next) {
+			memcpy(&future_p2, p2, sizeof(future_p2));
+			future_p2.xpos += displacement[future_p2.dir].dx;
+			future_p2.ypos += displacement[future_p2.dir].dy;
+			future_p2.altitude += SGN(future_p2.new_altitude - future_p2.altitude);
+
+			if (too_close_alt_xy(p1, p2, 1, 5) && too_close_alt_xy(&future_p1, &future_p2, 1, 4)) {
 				p1->collision_warn = TRUE;
 				p2->collision_warn = TRUE;
 			}
+		}
+	}
 
 	draw_all();
 
